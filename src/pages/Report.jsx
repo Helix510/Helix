@@ -1,0 +1,166 @@
+import React, { useState, useEffect } from 'react';
+import { Search, Mail, ShieldAlert, Volume2, MessageSquare, ChevronRight } from 'lucide-react';
+import StockHeader from '../components/StockHeader.jsx';
+import PriceChart from '../components/PriceChart.jsx';
+import AIAnalysis from '../components/AIAnalysis.jsx';
+import FinancialsGrid from '../components/FinancialsGrid.jsx';
+import FinancialsDeep from '../components/FinancialsDeep.jsx';
+import AboutSection from '../components/AboutSection.jsx';
+import AnalystTargets from '../components/AnalystTargets.jsx';
+import InsiderActivity from '../components/InsiderActivity.jsx';
+import Watchlist from '../components/Watchlist.jsx';
+import CompetitorTiles from '../components/CompetitorTiles.jsx';
+import NewsFeed from '../components/NewsFeed.jsx';
+import LoadingPipeline from '../components/LoadingPipeline.jsx';
+import { API_BASE_URL } from '../config.js';
+
+export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }) {
+  const [data, setData] = useState(null);
+  const [financialsData, setFinancialsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchInput, setSearchInput] = useState('');
+
+  useEffect(() => {
+    fetchData();
+  }, [ticker]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [stockRes, financialsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/stock/${ticker}`),
+        fetch(`${API_BASE_URL}/api/financials/${ticker}`)
+      ]);
+
+      const stockJson = await stockRes.json();
+      const financialsJson = await financialsRes.json();
+
+      if (stockJson.success) {
+        setData(stockJson.data);
+      } else {
+        setError(stockJson.message);
+        setLoading(false);
+        return;
+      }
+
+      if (financialsJson.success) {
+        setFinancialsData(financialsJson.data);
+      }
+    } catch (err) {
+      setError("Failed to reach research matrix.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) onSearch(searchInput.trim());
+  };
+
+  if (loading) return <LoadingPipeline ticker={ticker} />;
+
+  if (error) return (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <ShieldAlert className="text-rose-500 mb-4" size={48} />
+      <h2 className="text-2xl font-bold mb-2 tracking-tight text-gray-900">Research Core Exception</h2>
+      <p className="text-gray-500 mb-8 max-w-md font-medium">{error}</p>
+      <button onClick={onReset} className="bg-primary text-background font-bold px-6 py-2 rounded-lg text-sm transition-transform hover:scale-105 active:scale-95 shadow-none">RETURN TO TERMINAL</button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background text-primary font-['DM_Sans']">
+      {/* Top Nav */}
+      <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-border px-6 py-3 flex items-center justify-between gap-8">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={onReset}>
+          <div className="w-8 h-8 bg-surface border border-border rounded-lg flex items-center justify-center group-hover:border-primary transition-colors shadow-none">
+            <span className="text-xs font-black text-primary">HX</span>
+          </div>
+          <span className="text-xl font-bold tracking-tighter text-primary uppercase">Helix</span>
+        </div>
+
+        <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-xl">
+          <input 
+            type="text" 
+            placeholder="Search stocks, ETFs, companies..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full bg-input border border-border rounded-xl px-10 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+          />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" size={16} />
+        </form>
+
+        <div className="flex items-center gap-5">
+          <button 
+            onClick={toggleELI5}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all ${isELI5 ? 'bg-primary/10 border-primary text-primary' : 'bg-surface border-border text-muted hover:border-primary'}`}
+          >
+            <MessageSquare size={14} /> ELI5: {isELI5 ? 'ON' : 'OFF'}
+          </button>
+          <div className="h-4 w-px bg-border"></div>
+          <button className="text-muted hover:text-primary transition-colors"><Volume2 size={20} /></button>
+          <button className="text-muted hover:text-primary transition-colors"><Mail size={20} /></button>
+        </div>
+      </nav>
+
+      {/* Breadcrumbs */}
+      <div className="max-w-7xl mx-auto px-6 py-5 flex items-center gap-2 text-[10px] font-bold text-breadcrumb uppercase tracking-widest">
+        <span>S&P 500</span>
+        <ChevronRight size={10} className="text-border" />
+        <span>{data.sector}</span>
+        <ChevronRight size={10} className="text-border" />
+        <span className="text-primary">{ticker}</span>
+      </div>
+
+      {/* Report Layout */}
+      <main className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 items-start pb-32">
+        
+        {/* Left Column */}
+        <div className="space-y-10">
+          <StockHeader data={data} />
+          <div className="bg-surface border border-border rounded-3xl p-8 shadow-none overflow-hidden">
+             <PriceChart ticker={ticker} />
+          </div>
+          <FinancialsGrid data={data} financials={financialsData} />
+          <FinancialsDeep ticker={ticker} financials={financialsData} />
+          <AboutSection data={data} financials={financialsData} />
+          <AnalystTargets ticker={ticker} data={data} />
+          <NewsFeed ticker={ticker} companyName={data.companyName} />
+        </div>
+
+        {/* Right Column (Sidebar) */}
+        <div className="space-y-10 lg:sticky lg:top-24">
+          <AIAnalysis ticker={ticker} stockData={data} isELI5={isELI5} />
+          <CompetitorTiles ticker={ticker} sector={data.sector} />
+          <InsiderActivity ticker={ticker} />
+          <Watchlist ticker={ticker} stockData={data} />
+          
+          <div className="p-8 bg-surface border border-border rounded-3xl shadow-none">
+             <h3 className="text-[11px] font-bold text-muted uppercase tracking-widest mb-8">Helix Proprietary Score</h3>
+             <div className="space-y-8">
+               {[
+                 { label: 'Valuation', value: 72, color: 'bg-primary' },
+                 { label: 'Fundamentals', value: 85, color: 'bg-success' },
+                 { label: 'Market Sentiment', value: 64, color: 'bg-info' }
+               ].map((score, i) => (
+                 <div key={i} className="space-y-3">
+                   <div className="flex justify-between text-[11px] uppercase font-bold">
+                     <span className="text-muted">{score.label}</span>
+                     <span className="text-primary">{score.value}/100</span>
+                   </div>
+                   <div className="h-1.5 w-full bg-background rounded-full overflow-hidden">
+                     <div className={`h-full ${score.color} transition-all duration-1000 rounded-full`} style={{ width: `${score.value}%` }}></div>
+                   </div>
+                 </div>
+               ))}
+             </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}
