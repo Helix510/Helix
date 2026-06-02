@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mail, ShieldAlert, Volume2, MessageSquare, ChevronRight } from 'lucide-react';
+import { Mail, ShieldAlert, Volume2, MessageSquare, ChevronRight } from 'lucide-react';
 import StockHeader from '../components/StockHeader.jsx';
 import PriceChart from '../components/PriceChart.jsx';
 import AIAnalysis from '../components/AIAnalysis.jsx';
@@ -12,6 +12,7 @@ import Watchlist from '../components/Watchlist.jsx';
 import CompetitorTiles from '../components/CompetitorTiles.jsx';
 import NewsFeed from '../components/NewsFeed.jsx';
 import LoadingPipeline from '../components/LoadingPipeline.jsx';
+import SearchBar from '../components/SearchBar.jsx';
 import { API_BASE_URL } from '../config.js';
 
 export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }) {
@@ -19,7 +20,6 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
   const [financialsData, setFinancialsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -55,11 +55,6 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
     }
   };
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchInput.trim()) onSearch(searchInput.trim());
-  };
-
   if (loading) return <LoadingPipeline ticker={ticker} />;
 
   if (error) return (
@@ -71,6 +66,8 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
     </div>
   );
 
+  const companyLogo = financialsData?.profile?.logo;
+
   return (
     <div className="min-h-screen bg-background text-primary font-['DM_Sans']">
       {/* Top Nav */}
@@ -79,19 +76,14 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
           <div className="w-8 h-8 bg-surface border border-border rounded-lg flex items-center justify-center group-hover:border-primary transition-colors shadow-none">
             <span className="text-xs font-black text-primary">HX</span>
           </div>
-          <span className="text-xl font-bold tracking-tighter text-primary uppercase">Helix</span>
+          <span className="text-xl font-bold tracking-tighter text-gray-900">Helix</span>
         </div>
 
-        <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-xl">
-          <input 
-            type="text" 
-            placeholder="Search stocks, ETFs, companies..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full bg-input border border-border rounded-xl px-10 py-2.5 text-sm text-primary placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-          />
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" size={16} />
-        </form>
+        <SearchBar 
+          onSearch={onSearch} 
+          placeholder="Search stocks, ETFs, companies..."
+          variant="nav"
+        />
 
         <div className="flex items-center gap-5">
           <button 
@@ -112,7 +104,19 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
         <ChevronRight size={10} className="text-border" />
         <span>{data.sector}</span>
         <ChevronRight size={10} className="text-border" />
-        <span className="text-primary">{ticker}</span>
+        
+        <div className="flex items-center gap-1.5">
+          {companyLogo ? (
+            <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center border border-border overflow-hidden shrink-0">
+              <img src={companyLogo} alt={ticker} className="w-full h-full object-contain p-0.5" />
+            </div>
+          ) : (
+            <div className="w-5 h-5 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center text-[8px] font-black text-primary shrink-0">
+              {ticker[0]}
+            </div>
+          )}
+          <span className="text-primary">{ticker}</span>
+        </div>
       </div>
 
       {/* Report Layout */}
@@ -120,7 +124,7 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
         
         {/* Left Column */}
         <div className="space-y-10">
-          <StockHeader data={data} />
+          <StockHeader data={data} logo={companyLogo} />
           <div className="bg-surface border border-border rounded-3xl p-8 shadow-none overflow-hidden">
              <PriceChart ticker={ticker} />
           </div>

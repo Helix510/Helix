@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
-export default function StockHeader({ data }) {
+export default function StockHeader({ data, logo }) {
   const [currentQuote, setCurrentQuote] = useState(data);
   const [isSyncing, setIsSyncing] = useState(false);
   
@@ -36,7 +36,7 @@ export default function StockHeader({ data }) {
     <div className="bg-surface p-8 rounded-3xl border border-border shadow-none mb-6 font-['DM_Sans']">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-4">
             <span className="text-xs font-bold text-primary px-2 py-1 bg-primary/10 rounded uppercase tracking-wider">
               {data.exchange || 'NASDAQ'}
             </span>
@@ -44,11 +44,25 @@ export default function StockHeader({ data }) {
               S&P 500 • {data.sector}
             </span>
           </div>
-          <h1 className="text-4xl font-bold text-primary mb-1">{data.companyName}</h1>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-muted uppercase tracking-tight">
-              {ticker}
-            </span>
+          
+          <div className="flex items-center gap-4">
+            {logo ? (
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-border p-1 overflow-hidden shrink-0 shadow-sm">
+                <img src={logo} alt={data.companyName} className="w-full h-full object-contain" />
+              </div>
+            ) : (
+              <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center text-lg font-black text-primary shrink-0 shadow-sm">
+                {ticker[0]}
+              </div>
+            )}
+            <div>
+              <h1 className="text-4xl font-bold text-primary mb-0.5">{data.companyName}</h1>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-muted uppercase tracking-tight">
+                  {ticker}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
