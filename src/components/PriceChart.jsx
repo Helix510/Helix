@@ -32,7 +32,7 @@ export default function PriceChart({ ticker }) {
             year: 'numeric', 
             month: 'long', 
             day: 'numeric',
-            hour: range === '1d' || range === '1w' ? '2-digit' : undefined,
+            hour: range === '1d' || range === '1w' ? 'numeric' : undefined,
             minute: range === '1d' || range === '1w' ? '2-digit' : undefined
           }),
           price: item.close
@@ -47,27 +47,17 @@ export default function PriceChart({ ticker }) {
   };
 
   const formatXAxis = (dateStr) => {
-    const date = new Date(dateStr);
-    if (range === '1d') {
-      return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    }
-    if (range === '1w') {
-      const day = date.toLocaleDateString([], { weekday: 'short' });
-      const hour = date.getHours();
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour % 12 || 12;
-      return `${day} ${displayHour}${ampm}`;
-    }
-    if (range === '1m' || range === '3m') {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
-    if (range === '1y' || range === '2y') {
-      return date.toLocaleDateString([], { month: 'short', year: '2-digit' });
-    }
-    if (range === '5y') {
-      return date.getFullYear().toString();
-    }
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    if (!dateStr) return '';
+    // Handle both YYYY-MM-DD and full ISO strings
+    const date = dateStr.includes('T') ? new Date(dateStr) : new Date(dateStr + 'T12:00:00');
+    
+    if (range === '5y') return date.getFullYear().toString();
+    if (range === '1d') return date.toLocaleTimeString([], { hour: 'numeric', hour12: true });
+    if (range === '1w') return date.toLocaleDateString([], { weekday: 'short' });
+    
+    const month = date.toLocaleDateString([], { month: 'short' });
+    const year = String(date.getFullYear()).slice(2);
+    return `${month} '${year}`;
   };
 
   const strokeColor = '#00cfb4'; // Helix Teal
@@ -120,7 +110,7 @@ export default function PriceChart({ ticker }) {
           </div>
         )}
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={strokeColor} stopOpacity={0.2}/>
@@ -132,19 +122,23 @@ export default function PriceChart({ ticker }) {
               dataKey="date" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: '#8c92b5', fontSize: 11, fontWeight: 600 }}
-              minTickGap={80}
+              tick={{ fill: "#8c92b5", fontSize: 11, fontWeight: 600, dy: 8 }}
+              minTickGap={50}
               tickFormatter={formatXAxis}
+              tickCount={6}
               interval="preserveStartEnd"
-              dy={15}
+              height={40}
             />
             
             <YAxis 
-              domain={['dataMin * 0.98', 'dataMax * 1.02']}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#8c92b5', fontSize: 11, fontWeight: 600 }}
-              dx={-10}
+              domain={[dataMin => dataMin * 0.98, dataMax => dataMax * 1.02]}
+              axisLine={false} 
+              tickLine={false} 
+              tick={{ fill: "#8c92b5", fontSize: 11, fontWeight: 600 }}
+              tickFormatter={(v) => `$${Math.round(v)}`}
+              dx={8}
+              orientation="left"
+              width={60}
             />
 
             <Tooltip 

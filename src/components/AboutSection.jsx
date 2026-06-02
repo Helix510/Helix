@@ -1,15 +1,20 @@
 import React from 'react';
-import { Building2, Users, MapPin, Calendar, Globe } from 'lucide-react';
+import { Building2, MapPin, Calendar, Globe, Briefcase } from 'lucide-react';
 
 export default function AboutSection({ data, financials }) {
   const profile = financials?.profile || {};
-  const description = profile.description || data?.description || `No description available for ${data?.companyName || 'this company'}.`;
+  
+  // Prefer stockData.description (Yahoo Finance) over financials.profile.description (Finnhub)
+  const description = data?.description || profile.description || '';
+
+  // Prefer stockData.employees (Yahoo Finance) over financials.profile.employees (Finnhub)
+  const employeesCount = data?.employees || profile.employees || 0;
 
   const details = [
-    { label: 'CEO', value: profile.ceo || '—', icon: <Users size={14} /> },
-    { label: 'Founded', value: profile.founded || '—', icon: <Calendar size={14} /> },
-    { label: 'Employees', value: profile.employees?.toLocaleString() || '—', icon: <Building2 size={14} /> },
-    { label: 'HQ', value: profile.hq || '—', icon: <MapPin size={14} /> },
+    { label: 'IPO Year', value: profile.founded || '—', icon: <Calendar size={14} /> },
+    { label: 'Employees', value: employeesCount > 0 ? employeesCount.toLocaleString() : '—', icon: <Building2 size={14} /> },
+    { label: 'Industry', value: data?.industry || profile.industry || '—', icon: <Briefcase size={14} /> },
+    { label: 'Country', value: profile.hq || '—', icon: <MapPin size={14} /> },
   ];
 
   return (
@@ -17,18 +22,24 @@ export default function AboutSection({ data, financials }) {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-primary tracking-tight">About {data?.companyName || profile.name || 'Company'}</h3>
         <div className="flex gap-2">
-          <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider border border-primary/20">
-            {data?.sector || profile.industry || 'N/A'}
-          </span>
-          <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider border border-primary/20">
-            {data?.industry || 'N/A'}
-          </span>
+          {data?.sector && (
+            <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider border border-primary/20">
+              {data.sector}
+            </span>
+          )}
+          {data?.industry && (
+            <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase tracking-wider border border-primary/20">
+              {data.industry}
+            </span>
+          )}
         </div>
       </div>
       
-      <p className="text-sm text-muted leading-relaxed mb-8 max-w-4xl">
-        {description}
-      </p>
+      {description && (
+        <p className="text-sm text-muted leading-relaxed mb-8 max-w-4xl">
+          {description}
+        </p>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
         {details.map((detail, idx) => (

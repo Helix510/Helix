@@ -6,7 +6,7 @@ export default function FinancialsGrid({ data, financials }) {
        if (val !== 0) return '—';
     }
     
-    if (isPercent) return (Number(val) * 100).toFixed(2) + '%';
+    if (isPercent) return (Number(val) <= 1 ? (Number(val) * 100).toFixed(2) : Number(val).toFixed(2)) + '%';
     
     const num = Number(val);
     if (isNaN(num)) return '—';
@@ -24,8 +24,8 @@ export default function FinancialsGrid({ data, financials }) {
   
   const pe = metrics?.peRatio || data?.peRatio || 0;
   const eps = metrics.eps || data?.eps || 0;
-  const revenue = metrics.revenue || data?.revenue || 0;
-  const grossMargin = metrics.grossMargin || data?.grossMargin || 0;
+  const revenue = data?.revenue || metrics.revenue || 0;
+  const grossMargin = data?.grossMargin || metrics.grossMargin || 0;
   const mktCap = data?.marketCap || profile.marketCap || 0;
 
   const stats = [

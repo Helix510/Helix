@@ -11,10 +11,10 @@ export default function FinancialsDeep({ ticker, financials }) {
     { label: 'P/B Ratio', value: metrics.pbRatio ? metrics.pbRatio.toFixed(2) : '—' },
     { label: 'P/S Ratio', value: metrics.psRatio ? metrics.psRatio.toFixed(2) : '—' },
     { label: 'Debt/Equity', value: metrics.debtToEquity ? metrics.debtToEquity.toFixed(2) : '—' },
-    { label: 'ROE', value: metrics.roe ? (metrics.roe * 100).toFixed(2) + '%' : '—' },
-    { label: 'ROA', value: metrics.roa ? (metrics.roa * 100).toFixed(2) + '%' : '—' },
-    { label: 'Gross Margin', value: metrics.grossMargin ? (metrics.grossMargin * 100).toFixed(2) + '%' : '—' },
-    { label: 'Net Margin', value: metrics.netMargin ? (metrics.netMargin * 100).toFixed(2) + '%' : '—' },
+    { label: 'ROE', value: metrics.roe ? (metrics.roe <= 1 ? metrics.roe * 100 : metrics.roe).toFixed(2) + '%' : '—' },
+    { label: 'ROA', value: metrics.roa ? (metrics.roa <= 1 ? metrics.roa * 100 : metrics.roa).toFixed(2) + '%' : '—' },
+    { label: 'Gross Margin', value: metrics.grossMargin ? (metrics.grossMargin <= 1 ? metrics.grossMargin * 100 : metrics.grossMargin).toFixed(2) + '%' : '—' },
+    { label: 'Net Margin', value: metrics.netMargin ? (metrics.netMargin <= 1 ? metrics.netMargin * 100 : metrics.netMargin).toFixed(2) + '%' : '—' },
   ];
 
   const formatLarge = (val) => {

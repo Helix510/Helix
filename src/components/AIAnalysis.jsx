@@ -1,9 +1,9 @@
 import React from 'react';
-import { Sparkles, Volume2, AlertCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Sparkles, Volume2, AlertCircle, TrendingUp, TrendingDown, Minus, ShieldCheck } from 'lucide-react';
 import useAnalysis from '../hooks/useAnalysis.js';
 
-export default function AIAnalysis({ ticker, stockData, isELI5 }) {
-  const { analysis, loading, error } = useAnalysis(ticker, stockData, isELI5);
+export default function AIAnalysis({ ticker, stockData }) {
+  const { analysis, rating, confidence, loading, error } = useAnalysis(ticker, stockData);
 
   const speak = () => {
     const msg = new SpeechSynthesisUtterance();
@@ -11,14 +11,14 @@ export default function AIAnalysis({ ticker, stockData, isELI5 }) {
     window.speechSynthesis.speak(msg);
   };
 
-  const getRecommendation = () => {
-    const rec = (stockData?.recommendation || 'hold').toLowerCase();
-    if (rec.includes('buy')) return { label: 'BUY', color: 'bg-success', icon: <TrendingUp size={14} /> };
-    if (rec.includes('sell')) return { label: 'SELL', color: 'bg-danger', icon: <TrendingDown size={14} /> };
-    return { label: 'HOLD', color: 'bg-gray-600', icon: <Minus size={14} /> };
+  const getRatingUI = () => {
+    const r = rating?.toUpperCase() || 'HOLD';
+    if (r === 'BUY') return { label: 'BUY', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: <TrendingUp size={16} /> };
+    if (r === 'SELL') return { label: 'SELL', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20', icon: <TrendingDown size={16} /> };
+    return { label: 'HOLD', color: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/20', icon: <Minus size={16} /> };
   };
 
-  const recommendation = getRecommendation();
+  const ratingUI = getRatingUI();
 
   return (
     <div className="bg-surface rounded-3xl border border-border shadow-none mb-6 overflow-hidden font-['DM_Sans']">
@@ -39,9 +39,9 @@ export default function AIAnalysis({ ticker, stockData, isELI5 }) {
             >
               <Volume2 size={20} />
             </button>
-            <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-background text-xs font-bold ${recommendation.color}`}>
-              {recommendation.icon}
-              {recommendation.label}
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-sm ${ratingUI.bg} ${ratingUI.color} ${ratingUI.border}`}>
+              {ratingUI.icon}
+              {ratingUI.label}
             </div>
           </div>
         </div>
@@ -53,16 +53,40 @@ export default function AIAnalysis({ ticker, stockData, isELI5 }) {
               {error}
             </div>
           ) : (
-            <div className="text-muted leading-relaxed text-sm font-medium">
-              {analysis || (loading && (
+            <div className="space-y-6">
+              {loading ? (
                 <div className="flex flex-col gap-3">
                   <div className="h-4 bg-input rounded-full w-full animate-pulse"></div>
                   <div className="h-4 bg-input rounded-full w-[95%] animate-pulse"></div>
                   <div className="h-4 bg-input rounded-full w-[85%] animate-pulse"></div>
                   <div className="h-4 bg-input rounded-full w-[40%] animate-pulse"></div>
                 </div>
-              ))}
-              {loading && analysis && <span className="inline-block w-2 h-4 bg-primary/30 ml-1 animate-pulse rounded-sm"></span>}
+              ) : (
+                <>
+                  <div className="text-muted leading-relaxed text-sm font-medium whitespace-pre-wrap">
+                    {analysis}
+                  </div>
+                  
+                  {!loading && analysis && (
+                    <div className="flex items-center gap-6 pt-4 border-t border-border/50">
+                      <div>
+                        <p className="text-[10px] font-bold text-muted uppercase tracking-widest mb-1">Conviction</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-primary font-['JetBrains_Mono']">{confidence}%</span>
+                          <div className="w-20 h-1.5 bg-input rounded-full overflow-hidden">
+                            <div className="h-full bg-primary rounded-full" style={{ width: `${confidence}%` }}></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="h-8 w-px bg-border"></div>
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck size={18} className="text-emerald-500" />
+                        <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Institutional Grade</span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -71,13 +95,8 @@ export default function AIAnalysis({ ticker, stockData, isELI5 }) {
       <div className="px-8 py-5 bg-input border-t border-border flex items-center justify-between">
         <span className="text-[11px] font-bold text-muted uppercase tracking-widest flex items-center gap-2">
           <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse"></div>
-          AI-Generated Thesis // Gemini 2.0
+          AI-Generated Note // Wall Street Matrix
         </span>
-        {isELI5 && (
-          <span className="text-[10px] font-bold text-primary uppercase tracking-widest px-2 py-0.5 bg-primary/10 rounded">
-            ELI5 Mode Active
-          </span>
-        )}
       </div>
     </div>
   );
