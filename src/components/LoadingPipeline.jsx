@@ -1,65 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import { Activity } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
+import SP500 from '../data/sp500.js';
 
 const STAGES = [
-  "Engaging market ingestion grid...",
-  "Pulling structural financials...",
-  "Scanning SEC Form 4 filings...",
-  "Mapping competitor benchmarks...",
-  "Synthesizing analysis thesis...",
-  "Building institutional report..."
+  { label: "Fetching market data", duration: 500 },
+  { label: "Pulling financial statements", duration: 800 },
+  { label: "Scanning insider activity", duration: 500 },
+  { label: "Analyzing sector peers", duration: 600 },
+  { label: "Running AI analysis", duration: 1200 },
+  { label: "Building your report", duration: 400 }
 ];
 
 export default function LoadingPipeline({ ticker }) {
-  const [stage, setStage] = useState(0);
+  const [currentStage, setCurrentStage] = useState(0);
+  const [completedStages, setCompletedStages] = useState([]);
+  const [progress, setProgress] = useState(0);
+
+  const company = SP500.find(s => s.ticker === ticker);
+  const companyName = company ? company.name : 'Institutional Asset';
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStage(s => (s < STAGES.length - 1 ? s + 1 : s));
-    }, 1500);
-    return () => clearInterval(interval);
+    let timeout;
+    let stageIndex = 0;
+    
+    const runStage = () => {
+      if (stageIndex < STAGES.length) {
+        timeout = setTimeout(() => {
+          setCompletedStages(prev => [...prev, stageIndex]);
+          stageIndex++;
+          setCurrentStage(stageIndex);
+          setProgress((stageIndex / STAGES.length) * 100);
+          runStage();
+        }, STAGES[stageIndex].duration);
+      }
+    };
+
+    runStage();
+    return () => clearTimeout(timeout);
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-12 bg-background relative overflow-hidden">
-      {/* Background Matrix Effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-50"></div>
-      
-      <div className="flex flex-col items-center space-y-4 relative">
-        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-           <Activity size={24} className="text-primary animate-pulse" />
+    <div className="min-h-screen bg-[#08090d] flex flex-col items-center justify-center p-6 relative overflow-hidden font-['DM_Sans']">
+      {/* Pulse Logo */}
+      <div className="mb-12 relative">
+        <div className="absolute inset-0 bg-[#00cfb4]/20 blur-2xl rounded-full animate-pulse"></div>
+        <div className="w-20 h-20 bg-[#0c0e14] border border-[#1d2030] rounded-2xl flex items-center justify-center relative z-10">
+          <span className="text-3xl font-black text-[#00cfb4]">HX</span>
         </div>
       </div>
 
-      <div className="w-full max-w-md space-y-6 relative">
-        <div className="space-y-1 text-center">
-          <h2 className="text-2xl font-mono font-black text-white uppercase tracking-tighter">Initializing Research: {ticker}</h2>
-          <p className="text-[10px] font-mono font-black text-muted uppercase tracking-[0.3em] animate-pulse">{STAGES[stage]}</p>
-        </div>
-
-        <div className="h-1 w-full bg-surface border border-border rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-primary shadow-[0_0_12px_#00cfb4] transition-all duration-1000 ease-out" 
-            style={{ width: `${((stage + 1) / STAGES.length) * 100}%` }}
-          ></div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-           {STAGES.map((s, i) => (
-             <div key={i} className="flex items-center gap-2">
-               <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${i <= stage ? 'bg-primary' : 'bg-border'}`}></div>
-               <span className={`text-[8px] font-mono font-black uppercase tracking-widest ${i <= stage ? 'text-primary' : 'text-muted'}`}>
-                 Stage_{i + 1}
-               </span>
-             </div>
-           ))}
-        </div>
+      {/* Ticker & Name */}
+      <div className="text-center mb-16 space-y-2">
+        <h2 className="text-5xl font-bold tracking-tighter text-[#00cfb4] font-mono uppercase">{ticker}</h2>
+        <p className="text-sm font-medium text-[#8c92b5] uppercase tracking-[0.2em]">{companyName}</p>
       </div>
 
-      <footer className="absolute bottom-8 text-[9px] font-mono text-muted uppercase tracking-[0.4em]">
-         Terminal Connection Encrypted // Helix_v3.0.0
-      </footer>
+      {/* Pipeline Grid */}
+      <div className="w-full max-w-sm space-y-4">
+        {STAGES.map((stage, i) => {
+          const isCompleted = completedStages.includes(i);
+          const isActive = currentStage === i;
+          const isPending = !isCompleted && !isActive;
+
+          return (
+            <div 
+              key={i} 
+              className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-500 ${isActive ? 'bg-[#0c0e14] border-[#00cfb4]/30' : 'bg-transparent border-transparent'}`}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-6 h-6 flex items-center justify-center">
+                  {isCompleted ? (
+                    <div className="w-5 h-5 bg-[#2de2a0] rounded-full flex items-center justify-center animate-in zoom-in duration-300">
+                      <Check size={12} className="text-[#08090d]" strokeWidth={4} />
+                    </div>
+                  ) : isActive ? (
+                    <Loader2 size={18} className="text-[#00cfb4] animate-spin" />
+                  ) : (
+                    <div className="w-1.5 h-1.5 bg-[#1d2030] rounded-full"></div>
+                  )}
+                </div>
+                <span className={`text-sm font-bold tracking-tight transition-colors duration-500 ${isActive ? 'text-[#e6e9f4]' : isCompleted ? 'text-[#8c92b5]' : 'text-[#454866]'}`}>
+                  {stage.label}
+                </span>
+              </div>
+              {isActive && (
+                <span className="text-[10px] font-bold text-[#00cfb4] animate-pulse">PROCESSING</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#111318]">
+        <div 
+          className="h-full bg-[#00cfb4] shadow-[0_0_15px_#00cfb4] transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+
+      {/* Connection Status */}
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+         <div className="flex items-center gap-3 opacity-20">
+            <div className="w-1 h-1 bg-[#00cfb4] rounded-full animate-ping"></div>
+            <span className="text-[8px] font-bold text-[#e6e9f4] uppercase tracking-[0.5em]">Establishing Neural Connection // Sector_Hub_Verified</span>
+         </div>
+      </div>
     </div>
   );
 }

@@ -131,7 +131,7 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
           <FinancialsGrid data={data} financials={financialsData} />
           <FinancialsDeep ticker={ticker} financials={financialsData} />
           <AboutSection data={data} financials={financialsData} />
-          <AnalystTargets ticker={ticker} data={data} />
+          <AnalystTargets ticker={ticker} stockData={data} financials={financialsData} />
           <NewsFeed ticker={ticker} companyName={data.companyName} />
         </div>
 

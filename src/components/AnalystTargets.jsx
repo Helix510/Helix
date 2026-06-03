@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../config.js';
 
-export default function AnalystTargets({ ticker, data: stockData }) {
+export default function AnalystTargets({ ticker, stockData, financials }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,9 +33,11 @@ export default function AnalystTargets({ ticker, data: stockData }) {
 
   if (!data) return null;
 
-  const currentPrice = stockData.currentPrice || 0;
-  const meanTarget = data.priceTarget.mean || currentPrice;
-  const upside = ((meanTarget / (currentPrice || 1) - 1) * 100).toFixed(1);
+  const currentPrice = stockData?.currentPrice || 0;
+  const targetPrice = data.priceTarget?.mean || stockData?.targetPrice || 0;
+  const upside = (targetPrice && currentPrice) ? ((targetPrice - currentPrice) / currentPrice * 100).toFixed(1) : 0;
+  const upsideNum = parseFloat(upside);
+  const upsideDisplay = upsideNum > 0 ? `+${upside}%` : `${upside}%`;
   
   const totalRecs = Object.values(data.recommendations).reduce((a, b) => a + b, 0);
 
@@ -48,8 +50,8 @@ export default function AnalystTargets({ ticker, data: stockData }) {
             <p className="text-xs font-medium text-muted mt-0.5">Based on {totalRecs} ratings</p>
           </div>
           <div className="text-right">
-            <div className={`text-2xl font-bold font-['JetBrains_Mono'] ${parseFloat(upside) >= 0 ? 'text-success' : 'text-danger'}`}>
-              {parseFloat(upside) >= 0 ? '+' : ''}{upside}%
+            <div className={`text-2xl font-bold font-['JetBrains_Mono'] ${upsideNum >= 0 ? 'text-success' : 'text-danger'}`}>
+              {upsideDisplay}
             </div>
             <p className="text-[10px] font-bold text-muted uppercase tracking-widest">Est. Upside</p>
           </div>
@@ -57,17 +59,17 @@ export default function AnalystTargets({ ticker, data: stockData }) {
 
         <div className="space-y-10">
           <div className="flex items-center justify-between text-sm font-bold text-primary">
-            <span>Mean Target: ${meanTarget.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <span>Analyst Mean Target: ${targetPrice.toFixed(2)}</span>
             <span className="text-muted font-medium">Current: ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
 
           <div className="space-y-4">
             <div className="flex h-3 w-full rounded-full overflow-hidden">
-              <div style={{ width: `${(data.recommendations.strongBuy / totalRecs) * 100}%` }} className="bg-emerald-600"></div>
-              <div style={{ width: `${(data.recommendations.buy / totalRecs) * 100}%` }} className="bg-emerald-400"></div>
-              <div style={{ width: `${(data.recommendations.hold / totalRecs) * 100}%` }} className="bg-gray-600"></div>
-              <div style={{ width: `${(data.recommendations.sell / totalRecs) * 100}%` }} className="bg-rose-400"></div>
-              <div style={{ width: `${(data.recommendations.strongSell / totalRecs) * 100}%` }} className="bg-rose-600"></div>
+              <div style={{ width: `${(data.recommendations.strongBuy / (totalRecs || 1)) * 100}%` }} className="bg-emerald-600"></div>
+              <div style={{ width: `${(data.recommendations.buy / (totalRecs || 1)) * 100}%` }} className="bg-emerald-400"></div>
+              <div style={{ width: `${(data.recommendations.hold / (totalRecs || 1)) * 100}%` }} className="bg-gray-600"></div>
+              <div style={{ width: `${(data.recommendations.sell / (totalRecs || 1)) * 100}%` }} className="bg-rose-400"></div>
+              <div style={{ width: `${(data.recommendations.strongSell / (totalRecs || 1)) * 100}%` }} className="bg-rose-600"></div>
             </div>
             <div className="flex justify-between text-[10px] font-bold text-muted uppercase tracking-widest px-1">
               <span>Strong Buy ({data.recommendations.strongBuy})</span>
