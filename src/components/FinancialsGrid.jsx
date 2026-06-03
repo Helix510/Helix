@@ -23,14 +23,20 @@ export default function FinancialsGrid({ data, financials }) {
   const profile = financials?.profile || {};
   
   const pe = metrics?.peRatio || data?.peRatio || 0;
+  const forwardPe = data?.forwardPE || metrics?.forwardPe || 0;
   const eps = metrics.eps || data?.eps || 0;
   const revenue = data?.revenue || metrics.revenue || 0;
   const grossMargin = data?.grossMargin || metrics.grossMargin || 0;
   const mktCap = data?.marketCap || profile.marketCap || 0;
 
+  const divYield = data?.dividendYield || metrics.dividendYield || 0;
+  const annualDiv = divYield > 0 && data?.currentPrice ? (divYield * data.currentPrice).toFixed(2) : null;
+
   const stats = [
     { label: 'Market Cap', value: formatValue(mktCap, true) },
     { label: 'P/E Ratio', value: pe ? pe.toFixed(2) : '—' },
+    { label: 'Forward P/E', value: forwardPe ? forwardPe.toFixed(2) : '—' },
+    { label: 'Dividend Yield', value: divYield > 0 ? (divYield * 100).toFixed(2) + '%' : '—', sub: annualDiv ? `Est. $${annualDiv} / share annually` : null },
     { label: 'EPS (TTM)', value: eps ? '$' + eps.toFixed(2) : '—' },
     { label: 'Revenue', value: formatValue(revenue, true) },
     { label: 'Gross Margin', value: formatValue(grossMargin, false, true) },
@@ -42,15 +48,22 @@ export default function FinancialsGrid({ data, financials }) {
   return (
     <div className="bg-surface p-8 rounded-3xl border border-border shadow-none mb-6 font-['DM_Sans']">
       <h3 className="text-lg font-bold text-primary mb-8 tracking-tight">Financial Statistics</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-y-10 gap-x-6">
         {stats.map((m, i) => (
           <div key={i} className="flex flex-col gap-1">
             <span className="text-[11px] font-bold text-muted uppercase tracking-widest">
               {m.label}
             </span>
-            <span className="text-2xl font-bold text-primary font-['JetBrains_Mono'] tracking-tighter">
-              {m.value}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-primary font-['JetBrains_Mono'] tracking-tighter leading-tight">
+                {m.value}
+              </span>
+              {m.sub && (
+                <span className="text-[9px] font-medium text-[#454866] mt-1 uppercase tracking-wider">
+                  {m.sub}
+                </span>
+              )}
+            </div>
           </div>
         ))}
       </div>
