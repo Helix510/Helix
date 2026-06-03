@@ -7,6 +7,7 @@ import FinancialsGrid from '../components/FinancialsGrid.jsx';
 import FinancialsDeep from '../components/FinancialsDeep.jsx';
 import AboutSection from '../components/AboutSection.jsx';
 import AnalystTargets from '../components/AnalystTargets.jsx';
+import EarningsDate from '../components/EarningsDate.jsx';
 import InsiderActivity from '../components/InsiderActivity.jsx';
 import Watchlist from '../components/Watchlist.jsx';
 import CompetitorTiles from '../components/CompetitorTiles.jsx';
@@ -18,6 +19,7 @@ import { API_BASE_URL } from '../config.js';
 export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }) {
   const [data, setData] = useState(null);
   const [financialsData, setFinancialsData] = useState(null);
+  const [earningsData, setEarningsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,13 +31,15 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
     setLoading(true);
     setError(null);
     try {
-      const [stockRes, financialsRes] = await Promise.all([
+      const [stockRes, financialsRes, earningsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/stock/${ticker}`),
-        fetch(`${API_BASE_URL}/api/financials/${ticker}`)
+        fetch(`${API_BASE_URL}/api/financials/${ticker}`),
+        fetch(`${API_BASE_URL}/api/financials/${ticker}/earnings-date`)
       ]);
 
       const stockJson = await stockRes.json();
       const financialsJson = await financialsRes.json();
+      const earningsJson = await earningsRes.json();
 
       if (stockJson.success) {
         setData(stockJson.data);
@@ -47,6 +51,10 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
 
       if (financialsJson.success) {
         setFinancialsData(financialsJson.data);
+      }
+
+      if (earningsJson.success) {
+        setEarningsData(earningsJson.data);
       }
     } catch (err) {
       setError("Failed to reach research matrix.");
@@ -142,6 +150,8 @@ export default function Report({ ticker, onSearch, onReset, isELI5, toggleELI5 }
         {/* Right Column (Sidebar - stacks below on mobile) */}
         <div className="space-y-8 lg:space-y-10 lg:sticky lg:top-24 order-2">
           <AIAnalysis ticker={ticker} stockData={data} isELI5={isELI5} />
+          <AnalystTargets ticker={ticker} stockData={data} financials={financialsData} />
+          <EarningsDate data={earningsData} />
           <CompetitorTiles ticker={ticker} sector={data.sector} />
           <InsiderActivity ticker={ticker} />
           <Watchlist ticker={ticker} stockData={data} onSearch={onSearch} />
