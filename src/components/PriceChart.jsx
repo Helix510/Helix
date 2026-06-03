@@ -65,9 +65,9 @@ export default function PriceChart({ ticker }) {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#0c0e14] border border-[#1d2030] p-4 shadow-2xl rounded-2xl font-['DM_Sans']">
-          <p className="text-[10px] font-bold text-[#8c92b5] mb-1 uppercase tracking-widest">{payload[0].payload.fullDate}</p>
-          <p className="text-xl font-bold text-[#e6e9f4] font-['JetBrains_Mono']">${payload[0].value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+        <div className="bg-[#0c0e14] border border-[#1d2030] p-3 sm:p-4 shadow-2xl rounded-2xl font-['DM_Sans']">
+          <p className="text-[9px] sm:text-[10px] font-bold text-[#8c92b5] mb-1 uppercase tracking-widest">{payload[0].payload.fullDate}</p>
+          <p className="text-lg sm:text-xl font-bold text-[#e6e9f4] font-['JetBrains_Mono']">${payload[0].value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
         </div>
       );
     }
@@ -76,26 +76,26 @@ export default function PriceChart({ ticker }) {
 
   if (loading && data.length === 0) {
     return (
-      <div className="bg-surface p-8 rounded-3xl border border-border shadow-none mb-6 animate-pulse">
+      <div className="bg-surface p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-border shadow-none mb-6 animate-pulse">
         <div className="h-6 w-32 bg-input rounded mb-8"></div>
-        <div className="h-[500px] bg-background rounded-2xl"></div>
+        <div className="h-[280px] sm:h-[500px] bg-background rounded-2xl"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-surface p-8 rounded-3xl border border-border shadow-none mb-6 font-['DM_Sans']">
-      <div className="flex items-center justify-between mb-12">
+    <div className="bg-surface p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-border shadow-none mb-6 font-['DM_Sans']">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-12 gap-6">
         <div>
-          <h3 className="text-xl font-bold text-primary tracking-tight">Market Trajectory</h3>
-          <p className="text-sm font-medium text-muted mt-1">Price history for {ticker}</p>
+          <h3 className="text-lg sm:text-xl font-bold text-primary tracking-tight">Market Trajectory</h3>
+          <p className="text-xs sm:text-sm font-medium text-muted mt-1">Price history for {ticker}</p>
         </div>
-        <div className="flex gap-1 p-1 bg-input rounded-xl">
+        <div className="flex gap-1 p-1 bg-input rounded-xl overflow-x-auto w-full sm:w-auto scrollbar-hide">
           {RANGES.map((r) => (
             <button 
               key={r.value}
               onClick={() => setRange(r.value)}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${range === r.value ? 'bg-surface text-primary border border-border' : 'text-muted hover:text-primary'}`}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all whitespace-nowrap ${range === r.value ? 'bg-surface text-primary border border-border' : 'text-muted hover:text-primary'}`}
             >
               {r.label}
             </button>
@@ -103,14 +103,14 @@ export default function PriceChart({ ticker }) {
         </div>
       </div>
 
-      <div className="h-[500px] w-full relative">
+      <div className="h-[280px] sm:h-[500px] w-full relative">
         {loading && (
           <div className="absolute inset-0 z-10 bg-surface/40 backdrop-blur-[1px] flex items-center justify-center rounded-2xl">
-            <div className="w-10 h-10 border-4 border-border border-t-primary rounded-full animate-spin"></div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-border border-t-primary rounded-full animate-spin"></div>
           </div>
         )}
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 10 }}>
             <defs>
               <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={strokeColor} stopOpacity={0.2}/>
@@ -122,8 +122,8 @@ export default function PriceChart({ ticker }) {
               dataKey="date" 
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: "#8c92b5", fontSize: 11, fontWeight: 600, dy: 8 }}
-              minTickGap={50}
+              tick={{ fill: "#8c92b5", fontSize: 9, smFontSize: 11, fontWeight: 600, dy: 8 }}
+              minTickGap={40}
               tickFormatter={formatXAxis}
               tickCount={6}
               interval="preserveStartEnd"
@@ -131,14 +131,15 @@ export default function PriceChart({ ticker }) {
             />
             
             <YAxis 
-              domain={[dataMin => dataMin * 0.98, dataMax => dataMax * 1.02]}
+              domain={[dataMin => dataMin * 0.99, dataMax => dataMax * 1.01]}
               axisLine={false} 
               tickLine={false} 
-              tick={{ fill: "#8c92b5", fontSize: 11, fontWeight: 600 }}
+              tick={{ fill: "#8c92b5", fontSize: 9, smFontSize: 11, fontWeight: 600 }}
               tickFormatter={(v) => `$${Math.round(v)}`}
               dx={8}
               orientation="left"
-              width={60}
+              width={50}
+              hide={false}
             />
 
             <Tooltip 
@@ -154,7 +155,7 @@ export default function PriceChart({ ticker }) {
               fillOpacity={1} 
               fill="url(#colorPrice)" 
               animationDuration={1500}
-              activeDot={{ r: 6, fill: strokeColor, stroke: '#08090d', strokeWidth: 3 }}
+              activeDot={{ r: 4, smR: 6, fill: strokeColor, stroke: '#08090d', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

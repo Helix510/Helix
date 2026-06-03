@@ -46,20 +46,20 @@ export default function FinancialsGrid({ data, financials }) {
   ];
 
   return (
-    <div className="bg-surface p-8 rounded-3xl border border-border shadow-none mb-6 font-['DM_Sans']">
-      <h3 className="text-lg font-bold text-primary mb-8 tracking-tight">Financial Statistics</h3>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-y-10 gap-x-6">
+    <div className="bg-surface p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-border shadow-none mb-6 font-['DM_Sans']">
+      <h3 className="text-base sm:text-lg font-bold text-primary mb-6 sm:mb-8 tracking-tight">Financial Statistics</h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-8 sm:gap-y-10 gap-x-4 sm:gap-x-6">
         {stats.map((m, i) => (
           <div key={i} className="flex flex-col gap-1">
-            <span className="text-[11px] font-bold text-muted uppercase tracking-widest">
+            <span className="text-[10px] sm:text-[11px] font-bold text-muted uppercase tracking-widest">
               {m.label}
             </span>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-primary font-['JetBrains_Mono'] tracking-tighter leading-tight">
+              <span className="text-xl sm:text-2xl font-bold text-primary font-['JetBrains_Mono'] tracking-tighter leading-tight">
                 {m.value}
               </span>
               {m.sub && (
-                <span className="text-[9px] font-medium text-[#454866] mt-1 uppercase tracking-wider">
+                <span className="text-[8px] sm:text-[9px] font-medium text-[#454866] mt-1 uppercase tracking-wider leading-tight">
                   {m.sub}
                 </span>
               )}

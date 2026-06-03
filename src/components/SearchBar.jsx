@@ -74,15 +74,15 @@ export default function SearchBar({ onSearch, placeholder, error, variant = 'hom
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => input.trim().length > 0 && setShowDropdown(true)}
-          className={`w-full bg-[#111318] border ${error ? 'border-[#ff4f70]' : 'border-[#1d2030]'} rounded-2xl pl-12 pr-16 ${isHome ? 'py-5 text-lg' : 'py-2.5 text-sm'} font-medium text-white placeholder:text-[#454866] focus:outline-none focus:border-[#00cfb4]/50 focus:ring-1 focus:ring-[#00cfb4]/30 transition-all shadow-2xl`}
+          className={`w-full bg-[#111318] border ${error ? 'border-[#ff4f70]' : 'border-[#1d2030]'} rounded-2xl pl-10 pr-12 sm:pl-12 sm:pr-16 ${isHome ? 'py-4 sm:py-5 text-base sm:text-lg' : 'py-2 sm:py-2.5 text-xs sm:text-sm'} font-medium text-white placeholder:text-[#454866] focus:outline-none focus:border-[#00cfb4]/50 focus:ring-1 focus:ring-[#00cfb4]/30 transition-all shadow-2xl`}
         />
-        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 text-[#454866] group-focus-within:text-[#00cfb4] transition-colors`} size={isHome ? 24 : 18} />
+        <Search className={`absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#454866] group-focus-within:text-[#00cfb4] transition-colors`} size={isHome ? (window.innerWidth < 640 ? 20 : 24) : 16} />
         {isHome && (
           <button 
             onClick={() => input.trim() && handleSelect(input.trim().toUpperCase())}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#00cfb4] text-[#08090d] w-10 h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(0,207,180,0.3)]"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 bg-[#00cfb4] text-[#08090d] w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(0,207,180,0.3)]"
           >
-            <ArrowRight size={20} strokeWidth={3} />
+            <ArrowRight size={18} smSize={20} strokeWidth={3} />
           </button>
         )}
       </div>
@@ -97,14 +97,14 @@ export default function SearchBar({ onSearch, placeholder, error, variant = 'hom
               key={item.ticker}
               onClick={() => handleSelect(item.ticker)}
               onMouseEnter={() => setSelectedIndex(index)}
-              className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors border-l-2 ${selectedIndex === index ? 'bg-[#1a1c26] border-[#00cfb4]' : 'border-transparent hover:bg-[#111318]'}`}
+              className={`w-full flex items-center gap-3 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 text-left transition-colors border-l-2 ${selectedIndex === index ? 'bg-[#1a1c26] border-[#00cfb4]' : 'border-transparent hover:bg-[#111318]'}`}
             >
-              <div className="w-8 h-8 bg-[#00cfb4]/10 border border-[#00cfb4]/20 rounded-full flex items-center justify-center text-xs font-black text-[#00cfb4] shrink-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#00cfb4]/10 border border-[#00cfb4]/20 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black text-[#00cfb4] shrink-0">
                 {item.ticker[0]}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-white uppercase">{item.ticker}</span>
-                <span className="text-[10px] font-medium text-[#8c92b5] uppercase tracking-wider truncate">{item.name}</span>
+                <span className="text-xs sm:text-sm font-bold text-white uppercase">{item.ticker}</span>
+                <span className="text-[9px] sm:text-[10px] font-medium text-[#8c92b5] uppercase tracking-wider truncate max-w-[150px] sm:max-w-none">{item.name}</span>
               </div>
             </button>
           ))}
