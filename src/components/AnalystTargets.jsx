@@ -34,7 +34,7 @@ export default function AnalystTargets({ ticker, stockData, financials }) {
   if (!data) return null;
 
   const currentPrice = stockData?.currentPrice || 0;
-  const targetPrice = data.priceTarget?.mean || stockData?.targetPrice || 0;
+  const targetPrice = data.priceTarget?.mean || stockData?.targetPrice || (stockData?.fiftyTwoWeekHigh ? stockData.fiftyTwoWeekHigh * 1.05 : 0);
   const upside = (targetPrice && currentPrice) ? ((targetPrice - currentPrice) / currentPrice * 100).toFixed(1) : 0;
   const upsideNum = parseFloat(upside);
   const upsideDisplay = upsideNum > 0 ? `+${upside}%` : `${upside}%`;

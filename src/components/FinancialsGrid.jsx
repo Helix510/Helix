@@ -28,15 +28,15 @@ export default function FinancialsGrid({ data, financials }) {
   const revenue = data?.revenue || metrics.revenue || 0;
   const grossMargin = data?.grossMargin || metrics.grossMargin || 0;
   const mktCap = data?.marketCap || profile.marketCap || 0;
-
   const divYield = data?.dividendYield || metrics.dividendYield || 0;
-  const annualDiv = divYield > 0 && data?.currentPrice ? (divYield * data.currentPrice).toFixed(2) : null;
+
+  const annualDiv = divYield > 0 && data?.currentPrice ? (divYield < 1 ? (divYield * data.currentPrice).toFixed(2) : (divYield / 100 * data.currentPrice).toFixed(2)) : null;
 
   const stats = [
     { label: 'Market Cap', value: formatValue(mktCap, true) },
     { label: 'P/E Ratio', value: pe ? pe.toFixed(2) : '—' },
     { label: 'Forward P/E', value: forwardPe ? forwardPe.toFixed(2) : '—' },
-    { label: 'Dividend Yield', value: divYield > 0 ? (divYield * 100).toFixed(2) + '%' : '—', sub: annualDiv ? `Est. $${annualDiv} / share annually` : null },
+    { label: 'Dividend Yield', value: divYield > 0 ? (divYield < 1 ? (divYield * 100).toFixed(2) : divYield.toFixed(2)) + '%' : '—', sub: annualDiv ? `Est. $${annualDiv} / share annually` : null },
     { label: 'EPS (TTM)', value: eps ? '$' + eps.toFixed(2) : '—' },
     { label: 'Revenue', value: formatValue(revenue, true) },
     { label: 'Gross Margin', value: formatValue(grossMargin, false, true) },

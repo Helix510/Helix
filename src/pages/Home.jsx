@@ -41,7 +41,7 @@ function TrendingCard({ stock, onSearch }) {
         </div>
       </div>
       <div className="flex flex-col">
-        <span className="text-lg sm:text-xl font-bold text-white font-mono">${stock.price?.toFixed(2)}</span>
+        <span className="text-lg sm:text-xl font-bold text-white font-mono">${stock.regularMarketPrice?.toFixed(2) || stock.price?.toFixed(2)}</span>
         <span className="text-[9px] font-medium text-[#454866] truncate uppercase tracking-widest mt-0.5">{stock.companyName}</span>
       </div>
     </button>
@@ -67,24 +67,7 @@ export default function Home({ onSearch, error }) {
         ]);
         
         if (overRes.success) setMarketOverview(overRes.data);
-
-        // Fetch Detailed Trending Data in Parallel
-        const trendingTickers = ['AAPL', 'NVDA', 'TSLA', 'META', 'AMZN', 'MSFT', 'GOOGL', 'AVGO'];
-        const results = await Promise.all(
-          trendingTickers.map(t => fetch(`${API_BASE_URL}/api/stock/${t}`)
-            .then(r => r.json())
-            .then(d => d.data)
-            .catch(() => null))
-        );
-        
-        const validTrending = results.filter(d => d !== null).map(d => ({
-          symbol: d.ticker,
-          companyName: d.companyName,
-          price: d.currentPrice,
-          changePercent: d.changePercent
-        }));
-        
-        setTrending(validTrending);
+        if (trendRes.success) setTrending(trendRes.data);
       } catch (err) {
         console.error("Home Data Fetch Error:", err);
       } finally {
@@ -155,7 +138,7 @@ export default function Home({ onSearch, error }) {
                   <span className="text-xl font-bold text-white font-mono">{index.price?.toLocaleString(undefined, { minimumFractionDigits: 1 })}</span>
                   <div className={`flex items-center gap-0.5 text-xs font-bold ${isPos ? 'text-[#2de2a0]' : 'text-[#ff4f70]'}`}>
                     {isPos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                    {Math.abs(index.changePercent)}%
+                    {Math.abs(index.changePercent).toFixed(2)}%
                   </div>
                 </div>
               </div>
